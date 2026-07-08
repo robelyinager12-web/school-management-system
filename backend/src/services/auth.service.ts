@@ -1,6 +1,6 @@
 import bcrypt from "bcryptjs";
 import { prisma } from "../config/prisma";
-import { signAccessToken, signRefreshToken } from "../utils/jwt";
+import { signAccessToken, signRefreshToken, verifyRefreshToken } from "../utils/jwt";
 import { RegisterInput, LoginInput } from "../validators/auth.validator";
 
 export class AuthService {
@@ -45,6 +45,33 @@ export class AuthService {
     }
 
     return this.issueTokens(user.id, user.role, user.schoolId);
+  }
+
+  async refresh(refreshToken: string) {
+    const stored = await prisma.refreshToken.findUnique({
+      where: { token: refreshToken },
+    });
+
+    if (!stored || stored.revoked || stored.expiresAt < new Date()) {
+      throw new Error("Invalid or expired refresh token");
+    }
+
+    const payload = verifyRefreshToken(refreshToken);
+
+    const accessToken = signAccessToken({
+      userId: payload.userId,
+      role: payload.role,
+      schoolId: payload.schoolId,
+    });
+
+    return { accessToken };
+  }
+
+  async logout(refreshToken: string) {
+    await prisma.refreshToken.updateMany({
+      where: { token: refreshToken },
+      data: { revoked: true },
+    });
   }
 
   private async issueTokens(userId: string, role: string, schoolId: string) {
