@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { ThemeProvider } from "@/providers/theme-provider";
 import { QueryProvider } from "@/providers/query-provider";
-// import "./globals.css";
+import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Heroy | School Management System",
