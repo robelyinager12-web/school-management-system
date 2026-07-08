@@ -75,9 +75,11 @@ model User {
   teacher       Teacher?
   parent        Parent?
 
-  refreshTokens RefreshToken[]
-  loginHistory  LoginHistory[]
-  auditLogs     AuditLog[]
+  refreshTokens  RefreshToken[]
+  loginHistory   LoginHistory[]
+  auditLogs      AuditLog[]
+  conversations  Conversation[]
+  notifications  Notification[]
 
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
@@ -587,4 +589,140 @@ model StudentHostel {
 
   @@index([roomId])
   @@map("student_hostel")
+}
+
+// ===================== AI / CHAT =====================
+
+enum MessageRole {
+  USER
+  ASSISTANT
+  SYSTEM
+}
+
+enum ConversationChannel {
+  TEXT
+  VOICE
+}
+
+model Conversation {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String?
+  channel   ConversationChannel @default(TEXT)
+  context   Json?
+
+  messages  Message[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@map("conversations")
+}
+
+model Message {
+  id             String       @id @default(cuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  role           MessageRole
+  content        String
+  audioUrl       String?
+  metadata       Json?
+
+  createdAt      DateTime @default(now())
+
+  @@index([conversationId])
+  @@map("messages")
+}
+
+model AiAgentLog {
+  id         String   @id @default(cuid())
+  userId     String?
+  agentType  String
+  action     String
+  input      Json?
+  output     Json?
+  success    Boolean  @default(true)
+  errorMsg   String?
+
+  createdAt  DateTime @default(now())
+
+  @@index([agentType])
+  @@index([userId])
+  @@map("ai_agent_logs")
+}
+
+model VoiceSession {
+  id           String    @id @default(cuid())
+  userId       String
+  transcript   String?
+  audioUrl     String?
+  durationSecs Int?
+
+  startedAt    DateTime  @default(now())
+  endedAt      DateTime?
+
+  @@index([userId])
+  @@map("voice_sessions")
+}
+
+// ===================== NOTIFICATIONS =====================
+
+enum NotificationType {
+  INFO
+  WARNING
+  SUCCESS
+  ALERT
+}
+
+enum NotificationChannel {
+  IN_APP
+  EMAIL
+  SMS
+  WHATSAPP
+  PUSH
+}
+
+model Notification {
+  id        String               @id @default(cuid())
+  userId    String
+  user      User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  message   String
+  type      NotificationType     @default(INFO)
+  channel   NotificationChannel  @default(IN_APP)
+  read      Boolean              @default(false)
+  metadata  Json?
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([read])
+  @@map("notifications")
+}
+
+// ===================== EVENTS / ANNOUNCEMENTS =====================
+
+model Event {
+  id          String    @id @default(cuid())
+  title       String
+  description String?
+  startAt     DateTime
+  endAt       DateTime?
+  location    String?
+
+  createdAt   DateTime  @default(now())
+
+  @@map("events")
+}
+
+model Announcement {
+  id        String   @id @default(cuid())
+  title     String
+  content   String
+  audience  Role[]
+
+  createdAt DateTime @default(now())
+
+  @@map("announcements")
 }
