@@ -147,14 +147,15 @@ model Department {
 }
 
 model Class {
-  id        String    @id @default(cuid())
-  name      String
-  schoolId  String
-  school    School    @relation(fields: [schoolId], references: [id])
+  id            String         @id @default(cuid())
+  name          String
+  schoolId      String
+  school        School         @relation(fields: [schoolId], references: [id])
 
-  sections  Section[]
+  sections      Section[]
+  feeStructures FeeStructure[]
 
-  createdAt DateTime  @default(now())
+  createdAt     DateTime       @default(now())
 
   @@index([schoolId])
   @@map("classes")
@@ -210,6 +211,10 @@ model Student {
   attendance     Attendance[]
   results        Result[]
   submissions    AssignmentSubmission[]
+  invoices       Invoice[]
+  bookLoans      BookLoan[]
+  transport      StudentTransport?
+  hostel         StudentHostel?
 
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
@@ -379,4 +384,207 @@ model AssignmentSubmission {
   @@unique([assignmentId, studentId])
   @@index([studentId])
   @@map("assignment_submissions")
+}
+
+// ===================== FINANCE =====================
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  PARTIAL
+  OVERDUE
+  CANCELLED
+}
+
+enum PaymentMethod {
+  CASH
+  BANK_TRANSFER
+  CARD
+  MOBILE_MONEY
+  CHEQUE
+}
+
+model FeeStructure {
+  id        String    @id @default(cuid())
+  name      String
+  amount    Float
+  classId   String?
+  class     Class?    @relation(fields: [classId], references: [id])
+  frequency String    @default("TERM")
+
+  invoices  Invoice[]
+  createdAt DateTime  @default(now())
+
+  @@index([classId])
+  @@map("fee_structures")
+}
+
+model Invoice {
+  id             String        @id @default(cuid())
+  studentId      String
+  student        Student       @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  feeStructureId String
+  feeStructure   FeeStructure  @relation(fields: [feeStructureId], references: [id])
+  amountDue      Float
+  amountPaid     Float         @default(0)
+  status         PaymentStatus @default(PENDING)
+  dueDate        DateTime
+
+  payments       Payment[]
+  createdAt      DateTime      @default(now())
+
+  @@index([studentId])
+  @@index([status])
+  @@map("invoices")
+}
+
+model Payment {
+  id        String        @id @default(cuid())
+  invoiceId String
+  invoice   Invoice       @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  amount    Float
+  method    PaymentMethod
+  reference String?
+  paidAt    DateTime      @default(now())
+
+  @@index([invoiceId])
+  @@map("payments")
+}
+
+// ===================== HR / PAYROLL =====================
+
+model Employee {
+  id          String    @id @default(cuid())
+  userId      String    @unique
+  employeeNo  String    @unique
+  designation String
+  department  String?
+  salaryBase  Float
+  joiningDate DateTime  @default(now())
+
+  payslips    Payslip[]
+  createdAt   DateTime  @default(now())
+
+  @@map("employees")
+}
+
+model Payslip {
+  id         String    @id @default(cuid())
+  employeeId String
+  employee   Employee  @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  month      Int
+  year       Int
+  baseSalary Float
+  deductions Float     @default(0)
+  bonuses    Float     @default(0)
+  netSalary  Float
+  paidAt     DateTime?
+
+  createdAt  DateTime  @default(now())
+
+  @@unique([employeeId, month, year])
+  @@index([employeeId])
+  @@map("payslips")
+}
+
+// ===================== LIBRARY =====================
+
+model Book {
+  id          String     @id @default(cuid())
+  title       String
+  author      String
+  isbn        String?    @unique
+  category    String?
+  totalCopies Int        @default(1)
+  available   Int        @default(1)
+
+  loans       BookLoan[]
+  createdAt   DateTime   @default(now())
+
+  @@map("books")
+}
+
+model BookLoan {
+  id         String    @id @default(cuid())
+  bookId     String
+  book       Book      @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  studentId  String
+  student    Student   @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  borrowedAt DateTime  @default(now())
+  dueAt      DateTime
+  returnedAt DateTime?
+  fineAmount Float?    @default(0)
+
+  @@index([bookId])
+  @@index([studentId])
+  @@map("book_loans")
+}
+
+// ===================== TRANSPORT =====================
+
+model TransportRoute {
+  id          String   @id @default(cuid())
+  name        String
+  vehicleNo   String
+  driverName  String
+  driverPhone String?
+  capacity    Int      @default(30)
+
+  students    StudentTransport[]
+  createdAt   DateTime @default(now())
+
+  @@map("transport_routes")
+}
+
+model StudentTransport {
+  id          String         @id @default(cuid())
+  studentId   String         @unique
+  student     Student        @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  routeId     String
+  route       TransportRoute @relation(fields: [routeId], references: [id])
+  pickupPoint String?
+
+  createdAt   DateTime @default(now())
+
+  @@index([routeId])
+  @@map("student_transport")
+}
+
+// ===================== HOSTEL =====================
+
+model Hostel {
+  id        String       @id @default(cuid())
+  name      String
+  capacity  Int
+
+  rooms     HostelRoom[]
+  createdAt DateTime     @default(now())
+
+  @@map("hostels")
+}
+
+model HostelRoom {
+  id         String          @id @default(cuid())
+  hostelId   String
+  hostel     Hostel          @relation(fields: [hostelId], references: [id], onDelete: Cascade)
+  roomNumber String
+  capacity   Int             @default(4)
+
+  residents  StudentHostel[]
+  createdAt  DateTime        @default(now())
+
+  @@unique([hostelId, roomNumber])
+  @@map("hostel_rooms")
+}
+
+model StudentHostel {
+  id        String     @id @default(cuid())
+  studentId String     @unique
+  student   Student    @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  roomId    String
+  room      HostelRoom @relation(fields: [roomId], references: [id])
+  checkInAt DateTime   @default(now())
+
+  @@index([roomId])
+  @@map("student_hostel")
 }
