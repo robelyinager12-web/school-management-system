@@ -29,3 +29,29 @@ export async function login(req: Request, res: Response) {
     return res.status(401).json({ error: (error as Error).message });
   }
 }
+
+export async function refresh(req: Request, res: Response) {
+  const { refreshToken } = req.body;
+
+  if (!refreshToken) {
+    return res.status(400).json({ error: "Refresh token is required" });
+  }
+
+  try {
+    const result = await authService.refresh(refreshToken);
+    return res.status(200).json(result);
+  } catch (error) {
+    return res.status(401).json({ error: (error as Error).message });
+  }
+}
+
+export async function logout(req: Request, res: Response) {
+  const { refreshToken } = req.body;
+
+  if (!refreshToken) {
+    return res.status(400).json({ error: "Refresh token is required" });
+  }
+
+  await authService.logout(refreshToken);
+  return res.status(200).json({ message: "Logged out successfully" });
+}
