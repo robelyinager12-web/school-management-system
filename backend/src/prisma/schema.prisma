@@ -1,0 +1,150 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ===================== ENUMS =====================
+
+enum Role {
+  SUPER_ADMIN
+  ADMIN
+  PRINCIPAL
+  TEACHER
+  STUDENT
+  PARENT
+  ACCOUNTANT
+  LIBRARIAN
+  HR
+  RECEPTIONIST
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+enum AccountStatus {
+  ACTIVE
+  SUSPENDED
+  PENDING
+  DEACTIVATED
+}
+
+// ===================== CORE / AUTH =====================
+
+model School {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  logoUrl   String?
+  address   String?
+  phone     String?
+  email     String?
+  timezone  String   @default("Africa/Addis_Ababa")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users     User[]
+  classes   Class[]
+  departments Department[]
+
+  @@map("schools")
+}
+
+model User {
+  id            String        @id @default(cuid())
+  email         String        @unique
+  phone         String?
+  passwordHash  String
+  firstName     String
+  lastName      String
+  avatarUrl     String?
+  gender        Gender?
+  role          Role
+  status        AccountStatus @default(PENDING)
+
+  schoolId      String
+  school        School        @relation(fields: [schoolId], references: [id])
+
+  refreshTokens RefreshToken[]
+  loginHistory  LoginHistory[]
+  auditLogs     AuditLog[]
+
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@index([schoolId])
+  @@index([email])
+  @@map("users")
+}
+
+model RefreshToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  revoked   Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@map("refresh_tokens")
+}
+
+model LoginHistory {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  ipAddress String?
+  userAgent String?
+  device    String?
+  success   Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@map("login_history")
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+  action    String
+  entity    String
+  entityId  String?
+  metadata  Json?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([entity])
+  @@map("audit_logs")
+}
+
+// ===================== ORG STRUCTURE (placeholder refs, expanded in next phase) =====================
+
+model Department {
+  id        String   @id @default(cuid())
+  name      String
+  schoolId  String
+  school    School   @relation(fields: [schoolId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@index([schoolId])
+  @@map("departments")
+}
+
+model Class {
+  id        String   @id @default(cuid())
+  name      String
+  schoolId  String
+  school    School   @relation(fields: [schoolId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@index([schoolId])
+  @@map("classes")
+}
