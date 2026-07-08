@@ -5,6 +5,7 @@ import morgan from "morgan";
 import { env } from "./config/env";
 import authRoutes from "./routes/auth.routes";
 import userRoutes from "./routes/user.routes";
+import statsRoutes from "./routes/stats.routes";
 
 const app: Application = express();
 
@@ -20,5 +21,6 @@ app.get("/health", (_req, res) => {
 
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/stats", statsRoutes);
 
 export default app;
