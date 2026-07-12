@@ -11,6 +11,7 @@ import {
 } from "@/lib/validators/student";
 import { useCreateStudent } from "@/hooks/use-create-student";
 import { TextField } from "@/components/forms/text-field";
+import { SelectField } from "@/components/forms/select-field";
 import { cn } from "@/lib/utils";
 
 export default function NewStudentPage() {
@@ -106,10 +107,20 @@ export default function NewStudentPage() {
           />
         </div>
 
-        <TextField
+        <SelectField
           label="Blood Group (optional)"
-          placeholder="O+"
+          placeholder="Select blood group"
           registration={register("bloodGroup")}
+          options={[
+            { value: "A+", label: "A+" },
+            { value: "A-", label: "A-" },
+            { value: "B+", label: "B+" },
+            { value: "B-", label: "B-" },
+            { value: "AB+", label: "AB+" },
+            { value: "AB-", label: "AB-" },
+            { value: "O+", label: "O+" },
+            { value: "O-", label: "O-" },
+          ]}
         />
 
         {createStudent.isError && (
