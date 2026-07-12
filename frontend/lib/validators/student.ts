@@ -19,6 +19,7 @@ export const updateStudentFormSchema = z.object({
   bloodGroup: z.string().optional(),
   gender: z.enum(["MALE", "FEMALE", "OTHER"]).optional(),
   status: z.enum(["ACTIVE", "SUSPENDED", "PENDING", "DEACTIVATED"]),
+  sectionId: z.string().optional(),
 });
 
 export type CreateStudentFormValues = z.infer<typeof createStudentFormSchema>;
