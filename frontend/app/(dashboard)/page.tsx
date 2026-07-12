@@ -2,6 +2,7 @@
 
 import { useAuthStore } from "@/store/auth-store";
 import { StatsGrid } from "@/features/dashboard/stats-grid";
+import { AttendanceChart } from "@/features/dashboard/attendance-chart";
 
 export default function DashboardHomePage() {
   const { user } = useAuthStore();
@@ -18,6 +19,7 @@ export default function DashboardHomePage() {
       </div>
 
       <StatsGrid />
+      <AttendanceChart />
     </div>
   );
 }
