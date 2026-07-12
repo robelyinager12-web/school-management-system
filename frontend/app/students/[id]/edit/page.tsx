@@ -12,6 +12,7 @@ import {
 } from "@/lib/validators/student";
 import { useStudent } from "@/hooks/use-student";
 import { useUpdateStudent } from "@/hooks/use-update-student";
+import { useSections } from "@/hooks/use-sections";
 import { TextField } from "@/components/forms/text-field";
 import { SelectField } from "@/components/forms/select-field";
 import { cn } from "@/lib/utils";
@@ -22,6 +23,7 @@ export default function EditStudentPage() {
   const id = params.id as string;
 
   const { data: student, isLoading } = useStudent(id);
+  const { data: sections } = useSections();
   const updateStudent = useUpdateStudent(id);
 
   const {
@@ -43,6 +45,7 @@ export default function EditStudentPage() {
         bloodGroup: student.bloodGroup || undefined,
         gender: (student.user.gender as any) || undefined,
         status: student.user.status as any,
+        sectionId: (student as any).sectionId || undefined,
       });
     }
   }, [student, reset]);
@@ -113,6 +116,16 @@ export default function EditStudentPage() {
             error={errors.dateOfBirth?.message}
           />
         </div>
+
+        <SelectField
+          label="Class / Section"
+          placeholder="Select section"
+          registration={register("sectionId")}
+          options={(sections || []).map((s) => ({
+            value: s.id,
+            label: `${s.class.name} - ${s.name}`,
+          }))}
+        />
 
         <div className="grid grid-cols-2 gap-4">
           <SelectField
