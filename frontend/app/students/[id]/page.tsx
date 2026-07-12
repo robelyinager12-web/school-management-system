@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Trash2, Droplet, Calendar, Mail, Users } from "lucide-react";
+import { ArrowLeft, Trash2, Pencil, Calendar, Mail, Users } from "lucide-react";
 import { useStudent } from "@/hooks/use-student";
 import { useDeleteStudent } from "@/hooks/use-delete-student";
 import { StatusBadge } from "@/components/tables/status-badge";
@@ -75,13 +75,22 @@ export default function StudentDetailPage() {
             </div>
           </div>
 
-          <button
-            onClick={handleDelete}
-            className="flex items-center gap-2 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-400 hover:bg-red-500/20"
-          >
-            <Trash2 size={14} />
-            {confirmDelete ? "Confirm Delete" : "Delete"}
-          </button>
+          <div className="flex gap-2">
+            <Link
+              href={`/students/${id}/edit`}
+              className="flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white/70 hover:bg-white/10"
+            >
+              <Pencil size={14} />
+              Edit
+            </Link>
+            <button
+              onClick={handleDelete}
+              className="flex items-center gap-2 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-400 hover:bg-red-500/20"
+            >
+              <Trash2 size={14} />
+              {confirmDelete ? "Confirm Delete" : "Delete"}
+            </button>
+          </div>
         </div>
       </div>
 
