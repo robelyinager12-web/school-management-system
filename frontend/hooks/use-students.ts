@@ -3,12 +3,11 @@
 import { useQuery } from "@tanstack/react-query";
 import { apiClient } from "@/lib/api-client";
 
-export interface StudentRow {
+export interface StudentDetail {
   id: string;
   admissionNo: string;
   dateOfBirth: string;
   bloodGroup: string | null;
-  section: { name: string; class: { name: string } } | null;
   user: {
     id: string;
     email: string;
@@ -16,24 +15,35 @@ export interface StudentRow {
     lastName: string;
     status: string;
     avatarUrl: string | null;
+    gender: string | null;
   };
+  section: {
+    name: string;
+    class: { name: string };
+  } | null;
+  guardians: {
+    relation: string;
+    parent: {
+      user: {
+        firstName: string;
+        lastName: string;
+        email: string;
+        phone: string | null;
+      };
+    };
+  }[];
 }
 
-interface StudentsResponse {
-  data: StudentRow[];
-  meta: { page: number; limit: number; total: number; totalPages: number };
-}
-
-export function useStudents(page: number, search: string) {
-  return useQuery<StudentsResponse>({
-    queryKey: ["students", page, search],
+export function useStudent(id: string) {
+  return useQuery<StudentDetail>({
+    queryKey: ["student", id],
     queryFn: async () => {
       const token = localStorage.getItem("accessToken");
-      const res = await apiClient.get("/students", {
+      const res = await apiClient.get(`/students/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
-        params: { page, limit: 10, search: search || undefined },
       });
       return res.data;
     },
+    enabled: !!id,
   });
 }
