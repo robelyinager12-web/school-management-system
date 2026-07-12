@@ -34,6 +34,18 @@ export default function NewStudentPage() {
     }
   }
 
+  function getErrorMessage(): string {
+    const err = (createStudent.error as any)?.response?.data?.error;
+    if (!err) return "Failed to create student";
+    if (typeof err === "string") return err;
+    if (err?.fieldErrors) {
+      const messages = Object.values(err.fieldErrors).flat();
+      if (messages.length > 0) return messages.join(", ");
+    }
+    if (err?.formErrors?.length) return err.formErrors.join(", ");
+    return "Failed to create student";
+  }
+
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <Link
@@ -101,9 +113,7 @@ export default function NewStudentPage() {
         />
 
         {createStudent.isError && (
-          <p className="text-sm text-red-400">
-            {(createStudent.error as any)?.response?.data?.error || "Failed to create student"}
-          </p>
+          <p className="text-sm text-red-400">{getErrorMessage()}</p>
         )}
 
         <button
