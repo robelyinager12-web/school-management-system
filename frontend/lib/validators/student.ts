@@ -11,4 +11,15 @@ export const createStudentFormSchema = z.object({
   gender: z.enum(["MALE", "FEMALE", "OTHER"]).optional(),
 });
 
+export const updateStudentFormSchema = z.object({
+  firstName: z.string().min(1, "First name is required"),
+  lastName: z.string().min(1, "Last name is required"),
+  admissionNo: z.string().min(1, "Admission number is required"),
+  dateOfBirth: z.string().min(1, "Date of birth is required"),
+  bloodGroup: z.string().optional(),
+  gender: z.enum(["MALE", "FEMALE", "OTHER"]).optional(),
+  status: z.enum(["ACTIVE", "SUSPENDED", "PENDING", "DEACTIVATED"]),
+});
+
 export type CreateStudentFormValues = z.infer<typeof createStudentFormSchema>;
+export type UpdateStudentFormValues = z.infer<typeof updateStudentFormSchema>;
