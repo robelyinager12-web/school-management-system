@@ -11,6 +11,25 @@ async function main() {
     throw new Error("No school found. Register at least one admin user first.");
   }
 
+  console.log("Cleaning previous seed data...");
+
+  await prisma.payment.deleteMany({});
+  await prisma.invoice.deleteMany({});
+  await prisma.attendance.deleteMany({});
+  await prisma.parentStudent.deleteMany({});
+  await prisma.student.deleteMany({});
+  await prisma.parent.deleteMany({});
+  await prisma.teacherSubject.deleteMany({});
+  await prisma.teacher.deleteMany({});
+  await prisma.feeStructure.deleteMany({});
+  await prisma.subject.deleteMany({});
+  await prisma.section.deleteMany({});
+  await prisma.class.deleteMany({});
+  await prisma.department.deleteMany({});
+  await prisma.user.deleteMany({
+    where: { role: { in: ["TEACHER", "STUDENT", "PARENT"] } },
+  });
+
   const department = await prisma.department.create({
     data: { name: "Science Department", schoolId: school.id },
   });
