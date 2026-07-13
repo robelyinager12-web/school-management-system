@@ -41,3 +41,5 @@ Thumbs.db
 .turbo/
 .cache/
 *.tsbuildinfo
+# Uploaded files
+backend/uploads/
