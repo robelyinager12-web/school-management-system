@@ -8,6 +8,7 @@ export interface StudentDetail {
   admissionNo: string;
   dateOfBirth: string;
   bloodGroup: string | null;
+  sectionId: string | null;
   user: {
     id: string;
     email: string;
@@ -22,8 +23,10 @@ export interface StudentDetail {
     class: { name: string };
   } | null;
   guardians: {
+    id: string;
     relation: string;
     parent: {
+      id: string;
       user: {
         firstName: string;
         lastName: string;
