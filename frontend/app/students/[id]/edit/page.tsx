@@ -45,7 +45,7 @@ export default function EditStudentPage() {
         bloodGroup: student.bloodGroup || undefined,
         gender: (student.user.gender as any) || undefined,
         status: student.user.status as any,
-        sectionId: (student as any).sectionId || undefined,
+        sectionId: student.sectionId || undefined,
       });
     }
   }, [student, reset]);
