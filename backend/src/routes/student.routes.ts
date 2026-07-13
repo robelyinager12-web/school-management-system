@@ -7,7 +7,9 @@ import {
   deleteStudent,
 } from "../controllers/student.controller";
 import { linkGuardian, unlinkGuardian } from "../controllers/parent.controller";
+import { uploadStudentAvatar } from "../controllers/upload.controller";
 import { authenticate, authorize } from "../middleware/auth.middleware";
+import { avatarUpload } from "../config/multer";
 
 const router = Router();
 
@@ -28,6 +30,13 @@ router.delete(
   "/:id/guardians/:linkId",
   authorize("SUPER_ADMIN", "ADMIN", "PRINCIPAL"),
   unlinkGuardian
+);
+
+router.post(
+  "/:id/avatar",
+  authorize("SUPER_ADMIN", "ADMIN", "PRINCIPAL"),
+  avatarUpload.single("avatar"),
+  uploadStudentAvatar
 );
 
 export default router;
