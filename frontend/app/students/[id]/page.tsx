@@ -9,6 +9,7 @@ import { useDeleteStudent } from "@/hooks/use-delete-student";
 import { StatusBadge } from "@/components/tables/status-badge";
 import { InfoRow } from "@/components/cards/info-row";
 import { GuardianPanel } from "@/features/students/guardian-panel";
+import { AvatarUpload } from "@/components/cards/avatar-upload";
 
 function formatDate(dateStr: string) {
   return new Date(dateStr).toLocaleDateString("en-US", {
@@ -61,10 +62,11 @@ export default function StudentDetailPage() {
       <div className="glass-panel rounded-2xl p-6">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-4">
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-purple-500 to-pink-500 text-xl font-semibold text-white">
-              {student.user.firstName[0]}
-              {student.user.lastName[0]}
-            </div>
+            <AvatarUpload
+              studentId={id}
+              avatarUrl={student.user.avatarUrl}
+              initials={`${student.user.firstName[0]}${student.user.lastName[0]}`}
+            />
             <div>
               <h1 className="text-2xl font-bold text-white">
                 {student.user.firstName} {student.user.lastName}
