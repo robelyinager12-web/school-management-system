@@ -112,7 +112,7 @@ export class StudentService {
         admissionNo: input.admissionNo,
         dateOfBirth: new Date(input.dateOfBirth),
         bloodGroup: input.bloodGroup,
-        sectionId: input.sectionId,
+        section: input.sectionId ? { connect: { id: input.sectionId } } : undefined,
         user: {
           create: {
             email: input.email,
@@ -144,7 +144,9 @@ export class StudentService {
         admissionNo: input.admissionNo,
         dateOfBirth: input.dateOfBirth ? new Date(input.dateOfBirth) : undefined,
         bloodGroup: input.bloodGroup,
-        sectionId: input.sectionId,
+        section: input.sectionId
+          ? { connect: { id: input.sectionId } }
+          : undefined,
         user: {
           update: {
             firstName: input.firstName,

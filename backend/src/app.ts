@@ -7,6 +7,7 @@ import authRoutes from "./routes/auth.routes";
 import userRoutes from "./routes/user.routes";
 import statsRoutes from "./routes/stats.routes";
 import studentRoutes from "./routes/student.routes";
+import sectionRoutes from "./routes/section.routes";
 
 const app: Application = express();
 
@@ -24,5 +25,6 @@ app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/stats", statsRoutes);
 app.use("/api/students", studentRoutes);
+app.use("/api/sections", sectionRoutes);
 
 export default app;
