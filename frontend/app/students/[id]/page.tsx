@@ -3,11 +3,12 @@
 import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Trash2, Pencil, Calendar, Mail, Users } from "lucide-react";
+import { ArrowLeft, Trash2, Pencil, Calendar, Mail } from "lucide-react";
 import { useStudent } from "@/hooks/use-student";
 import { useDeleteStudent } from "@/hooks/use-delete-student";
 import { StatusBadge } from "@/components/tables/status-badge";
 import { InfoRow } from "@/components/cards/info-row";
+import { GuardianPanel } from "@/features/students/guardian-panel";
 
 function formatDate(dateStr: string) {
   return new Date(dateStr).toLocaleDateString("en-US", {
@@ -127,22 +128,7 @@ export default function StudentDetailPage() {
         </div>
       </div>
 
-      <div className="glass-panel rounded-2xl p-6">
-        <h2 className="mb-2 flex items-center gap-2 text-sm font-semibold text-white/70">
-          <Users size={14} /> Guardians
-        </h2>
-        {student.guardians.length === 0 ? (
-          <p className="py-4 text-sm text-white/40">No guardians linked</p>
-        ) : (
-          student.guardians.map((g, i) => (
-            <InfoRow
-              key={i}
-              label={`${g.parent.user.firstName} ${g.parent.user.lastName} (${g.relation})`}
-              value={g.parent.user.email}
-            />
-          ))
-        )}
-      </div>
+      <GuardianPanel studentId={id} guardians={student.guardians} />
     </div>
   );
 }
