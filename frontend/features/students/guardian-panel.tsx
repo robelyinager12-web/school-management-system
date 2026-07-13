@@ -1,0 +1,134 @@
+"use client";
+
+import { useState } from "react";
+import { UserPlus, X } from "lucide-react";
+import { useParents } from "@/hooks/use-parents";
+import { useLinkGuardian, useUnlinkGuardian } from "@/hooks/use-guardian-links";
+import { StudentDetail } from "@/hooks/use-student";
+
+export function GuardianPanel({
+  studentId,
+  guardians,
+}: {
+  studentId: string;
+  guardians: StudentDetail["guardians"];
+}) {
+  const [adding, setAdding] = useState(false);
+  const [search, setSearch] = useState("");
+  const [selectedParentId, setSelectedParentId] = useState("");
+  const [relation, setRelation] = useState("Parent");
+
+  const { data: parents } = useParents(search);
+  const linkGuardian = useLinkGuardian(studentId);
+  const unlinkGuardian = useUnlinkGuardian(studentId);
+
+  async function handleLink() {
+    if (!selectedParentId) return;
+    await linkGuardian.mutateAsync({ parentId: selectedParentId, relation });
+    setAdding(false);
+    setSelectedParentId("");
+    setSearch("");
+  }
+
+  return (
+    <div className="glass-panel rounded-2xl p-6">
+      <div className="mb-2 flex items-center justify-between">
+        <h2 className="flex items-center gap-2 text-sm font-semibold text-white/70">
+          Guardians
+        </h2>
+        <button
+          onClick={() => setAdding((v) => !v)}
+          className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-2.5 py-1.5 text-xs text-white/70 hover:bg-white/10"
+        >
+          <UserPlus size={14} />
+          {adding ? "Cancel" : "Add Guardian"}
+        </button>
+      </div>
+
+      {adding && (
+        <div className="mb-4 space-y-2 rounded-lg border border-white/10 bg-white/5 p-3">
+          <input
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setSelectedParentId("");
+            }}
+            placeholder="Search parent by name or email..."
+            className="w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-sm text-white outline-none placeholder:text-white/40"
+          />
+
+          {search && (
+            <div className="max-h-40 overflow-y-auto rounded-lg border border-white/10">
+              {(parents || []).length === 0 ? (
+                <p className="p-3 text-xs text-white/40">No parents found</p>
+              ) : (
+                parents!.map((p) => (
+                  <button
+                    key={p.id}
+                    onClick={() => setSelectedParentId(p.id)}
+                    className={`w-full px-3 py-2 text-left text-sm hover:bg-white/10 ${
+                      selectedParentId === p.id ? "bg-purple-500/20 text-white" : "text-white/70"
+                    }`}
+                  >
+                    {p.user.firstName} {p.user.lastName}{" "}
+                    <span className="text-white/40">({p.user.email})</span>
+                  </button>
+                ))
+              )}
+            </div>
+          )}
+
+          <div className="flex items-center gap-2">
+            <select
+              value={relation}
+              onChange={(e) => setRelation(e.target.value)}
+              className="rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-sm text-white outline-none"
+            >
+              <option className="bg-neutral-900" value="Parent">Parent</option>
+              <option className="bg-neutral-900" value="Guardian">Guardian</option>
+              <option className="bg-neutral-900" value="Grandparent">Grandparent</option>
+              <option className="bg-neutral-900" value="Sibling">Sibling</option>
+              <option className="bg-neutral-900" value="Other">Other</option>
+            </select>
+
+            <button
+              onClick={handleLink}
+              disabled={!selectedParentId || linkGuardian.isPending}
+              className="flex-1 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 px-3 py-2 text-sm font-medium text-white disabled:opacity-40"
+            >
+              {linkGuardian.isPending ? "Linking..." : "Link Guardian"}
+            </button>
+          </div>
+
+          {linkGuardian.isError && (
+            <p className="text-xs text-red-400">
+              {(linkGuardian.error as any)?.response?.data?.error || "Failed to link guardian"}
+            </p>
+          )}
+        </div>
+      )}
+
+      {guardians.length === 0 ? (
+        <p className="py-4 text-sm text-white/40">No guardians linked</p>
+      ) : (
+        guardians.map((g) => (
+          <div key={g.id} className="flex items-center justify-between border-b border-white/5 py-3 last:border-0">
+            <div>
+              <p className="text-sm font-medium text-white">
+                {g.parent.user.firstName} {g.parent.user.lastName}{" "}
+                <span className="text-white/40">({g.relation})</span>
+              </p>
+              <p className="text-xs text-white/50">{g.parent.user.email}</p>
+            </div>
+            <button
+              onClick={() => unlinkGuardian.mutate(g.id)}
+              className="rounded-lg p-1.5 text-white/40 hover:bg-red-500/10 hover:text-red-400"
+            >
+              <X size={14} />
+            </button>
+          </div>
+        ))
+      )}
+    </div>
+  );
+}
